@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class IntegerListImpl implements IntegerList {
 
-    private final Integer[] array;
+    private Integer[] array;
     private final int size;
 
     public IntegerListImpl(int size) {
@@ -31,7 +31,10 @@ public class IntegerListImpl implements IntegerList {
 
     @Override
     public Integer add(int index, Integer item) {
-        if (index >= size - 1 || index < 0 || array[size - 1] != null) {
+        if (array[size - 1] != null){
+            grow();
+        }
+        if (index >= size - 1 || index < 0) {
             throw new IndexOutOfBoundsException();
         }
         if (item == null) {
@@ -151,7 +154,7 @@ public class IntegerListImpl implements IntegerList {
 
     @Override
     public int size() {
-        int i = size - 1;
+        int i = array.length - 1;
         while (i >= 0) {
             if (array[i] != null) {
                 return i + 1;
@@ -188,15 +191,38 @@ public class IntegerListImpl implements IntegerList {
     }
 
     public void sort() {
-        for (int i = 1; i < size(); i++) {
-            Integer temp = array[i];
-            int j = i;
-            while (j > 0 && array[j - 1] >= temp) {
-                array[j] = array[j - 1];
-                j--;
-            }
-            array[j] = temp;
+        quickSort(array,0,size()-1);
+    }
+
+    private void quickSort(Integer[] arr, int begin, int end) {
+        if (begin < end) {
+            int partitionIndex = partition(arr, begin, end);
+
+            quickSort(arr, begin, partitionIndex - 1);
+            quickSort(arr, partitionIndex + 1, end);
         }
+    }
+
+    private int partition(Integer[] arr, int begin, int end) {
+        int pivot = arr[end];
+        int i = (begin - 1);
+
+        for (int j = begin; j < end; j++) {
+            if (arr[j] <= pivot) {
+                i++;
+
+                swapElements(arr, i, j);
+            }
+        }
+
+        swapElements(arr, i + 1, end);
+        return i + 1;
+    }
+
+    private void swapElements(Integer[] arr, int i, int minElementIndex) {
+        Integer buf = arr[i];
+        arr[i] = arr[minElementIndex];
+        arr[minElementIndex] = buf;
     }
 
     private boolean containsBinary(int element) {
@@ -217,6 +243,11 @@ public class IntegerListImpl implements IntegerList {
             }
         }
         return false;
+    }
+    private void grow(){
+        Integer[] newArray = new Integer[array.length + array.length/2];
+        System.arraycopy(array, 0, newArray, 0, array.length);
+        array = newArray;
     }
 
 }
